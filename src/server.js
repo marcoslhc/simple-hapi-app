@@ -1,11 +1,31 @@
 import Hapi from "hapi";
-
+import myPlugin from "./plugin";
 async function init() {
   const server = Hapi.server({
-    port: 8080,
+    port: process.env.PORT,
     host: "localhost"
   });
-
+  await server.register({
+    plugin: myPlugin,
+    options: {
+      apiUrl: process.env.EXTERNAL_API_URL,
+      path: "/personal-boat-shopper",
+      parseSearchParams: request => {
+        return {
+          length: {
+            min: {
+              value: 9,
+              uom: "m"
+            },
+            max: {
+              value: 12,
+              uom: "m"
+            }
+          }
+        };
+      }
+    }
+  });
   await server.start();
   console.log(`Server Running on ${server.info.uri}`);
 }
